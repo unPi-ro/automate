@@ -2,7 +2,7 @@
 all:
   hosts:
     # backup_fast: FQDNs need to be added here, so that we/ansible can SSH into them
-    minus.mycompany.com:
+    original.mycompany.com:
       ansible_user: root
 
 # group name used for deployments, can be used with ansible-playbook -e target=minus
@@ -23,7 +23,7 @@ minus:
       # used by cronjobs and logrotate
       notifyemail: notifications@mycompany.com
 
-      # restore db and files from here, instead of backups/tarsnap
+      # restore db and files from this server, instead of the tarsnap/backups
       # backup_fast: original.mycompany.com # way faster restores than tarsnap
       # all backups have as root directory inside them the "backup" directory
       backup_root: /

@@ -7,6 +7,6 @@ openssl asn1parse -genconf private-key.asn1 -noout -out private-key.der
 openssl rsa -inform DER -in private-key.der -outform PEM -out cert-private-key.pem
 ```
 ---
-### to have tarsnap backup working, make own account at https://www.tarsnap.com/
+### to have tarsnap backup working, create an account at https://www.tarsnap.com/
 ### then save (all) your tarsnap private server keys in this /files folder as:
 ### {put-server's-FQDN-here}-tarsnap.key

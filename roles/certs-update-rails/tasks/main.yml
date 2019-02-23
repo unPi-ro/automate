@@ -1,0 +1,9 @@
+---
+- name: populating server_names
+  include_tasks: servernames.yml
+
+- name: "creating/updating SSL certs for {{ app.name }}"
+  include_tasks: certs.yml
+
+- name: "creating/updating nginx site configuration for {{ app.name }}"
+  include_tasks: sites.yml

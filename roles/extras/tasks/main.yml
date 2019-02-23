@@ -1,0 +1,5 @@
+---
+- name: installing locate debconf-utils
+  apt:
+    name: locate,debconf-utils
+

@@ -1,0 +1,10 @@
+---
+- hosts: "{{ target }}"
+  tasks:
+
+    - name: allowing nginx reloading
+      set_fact: nginx=true
+
+    - name: executing static/html deployments
+      include_role:
+        name: html

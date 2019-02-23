@@ -1,0 +1,15 @@
+---
+- hosts: "{{ target }}"
+  tasks:
+
+    - name: allowing nginx reloading
+      set_fact: nginx=true
+
+    # hacking vars / service.nodejs to be used in the already coded deps.yml
+    - name: temporarily setting service.nodejs to 10
+      set_fact:
+        service: { nodejs: 10 }
+
+    - name: executing rails deployments
+      include_role:
+        name: rails

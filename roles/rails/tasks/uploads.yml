@@ -1,0 +1,13 @@
+---
+- name: "preparing rails app (uploads) directory on {{ inventory_hostname }}"
+  file:
+    dest: "{{ appshome }}/{{ app.name }}/shared/public/uploads"
+    mode: u=rwx,g=rx,o=rx
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    state: directory
+
+- name: "rsyncing {{ app.name }} uploads from {{ backup_fast }}"
+  when: backup_fast is defined
+  shell: "rsync -av -e 'ssh -o StrictHostKeyChecking=no' {{ backup_fast }}:{{ appshome }}/{{ app.name }}/shared/public/uploads/ {{ appshome }}/{{ app.name }}/shared/public/uploads/"
+

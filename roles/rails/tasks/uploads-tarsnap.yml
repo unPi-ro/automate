@@ -1,0 +1,28 @@
+---
+- name: "preparing rails app (uploads) directory on {{ inventory_hostname }}"
+  file:
+    dest: "{{ appshome }}/{{ app.name }}/shared/public/uploads"
+    mode: u=rwx,g=rx,o=rx
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    state: directory
+
+- name: "detecting the last backup/tarsnap archive"
+  when: tararch|bool
+  shell: "tarsnap --list-archives | sort | tail -n 1"
+  register: tarlist
+
+- name: setting tararch to the very last tarsnap archive
+  set_fact: tararch="{{ tarlist.stdout }}"
+  when: tarlist|changed
+
+# do not execute this task if it was executed already elsewhere, i.e. mysqldb-tar
+- name: "restoring *{{ app.sync }}* files from backup/tarsnap"
+  when: tarex|bool
+  shell: "LC_ALL=en_US.UTF-8 tarsnap -xvf {{ tararch }} --include='*{{ app.sync }}*' -C {{ backup_root }}"
+  args:
+    executable: /bin/bash
+  register: tarex
+
+- name: "rsyncing {{ app.name }} uploads from {{ backup_root }}backup"
+  shell: "rsync -av {{ backup_root }}/backup/apps/{{ app.name }}/shared/public/uploads/ {{ appshome }}/{{ app.name }}/shared/public/uploads/"

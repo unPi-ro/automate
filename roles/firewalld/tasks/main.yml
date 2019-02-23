@@ -1,0 +1,22 @@
+---
+- name: removing firewalld if present
+  apt:
+    name: firewalld
+    state: absent
+    purge: yes
+
+- name: installing ufw (uncomplicated firewall)
+  apt:
+    name: ufw
+
+- name: allowing (all) outgoing traffic by default
+  shell: ufw default allow outgoing
+
+- name: denying (all) incoming traffic by default
+  shell: ufw default deny incoming
+
+- name: allowing incoming SSH traffic
+  shell: ufw allow ssh
+
+- name: enabling firewall use in roles
+  set_fact: firewall=true

@@ -1,0 +1,4 @@
+---
+- name: running
+  debug:
+    msg: "currently in {{role_name}}" 

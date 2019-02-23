@@ -1,0 +1,130 @@
+---
+all:
+  hosts:
+    # backup_fast: FQDNs need to be added here, so that we/ansible can SSH into them
+    minus.mycompany.com:
+      ansible_user: root
+
+# group name used for deployments, can be used with ansible-playbook -e target=minus
+minus:
+  hosts:
+
+    # server names must be FQDNs, will be used to bootstrap postfix configuration
+    minus.mycompany.com:
+
+      # server variables
+      ansible_user: root
+      deploy_user: deployer
+      rvm_ruby: 2.5.1
+
+      # do not activate the cron: jobs by default, nor the cron for backup
+      active: no
+
+      # used by cronjobs and logrotate
+      notifyemail: notifications@mycompany.com
+
+      # restore db and files from here, instead of backups/tarsnap
+      # backup_fast: original.mycompany.com # way faster restores than tarsnap
+      # all backups have as root directory inside them the "backup" directory
+      backup_root: /
+
+      # each service must have its own (role) entry in the roles directory
+      services:
+        - { name: checks, os: Debian } # we love Debian, you should install it
+        - { name: update }
+        - { name: firewalld }
+        - { name: ntp, sync: pool.ntp.org }
+        - { name: passenger }
+        - { name: nginx }
+        - { name: html }
+        - { name: middleman }
+        - { name: percona, version: "5.7", password: oh..please..change..me }
+        # use postix's ssl: opt only when the certicate is already generated
+        # for instance certdebug: on will generate a dummy one for each app
+        # otherwise it generates its own certificate under inventory_hostname
+        # enforcessl: is used to generate a certificate even when usessl: no
+        - { name: postfix, enforcessl: yes }
+        - { name: tarsnap, seed: minus.mycompany.com }
+        - { name: rails, nodejs: 10 }
+        - { name: extras }
+        - { name: restart, enforce: false } # server reboots only when enforce:d
+
+      wwwroot: /var/www/html
+      logroot: /all-webapps-logs
+
+      usessl: yes
+
+      certroot: /ssl-private-certs
+      certemail: ssl.admin@mycompany.com
+      certacckey: certbot-private-key.pem
+      certackdir: .well-known/acme-challenge
+      certdebug: no
+      certusage:
+        - digitalSignature
+        - keyEncipherment
+      certversion: 2
+      certdays: 30
+
+      appshome: /all-webapps-home
+      temphome: /tmp/automate.magic
+
+      # rails apps, coded with (recent) Ruby on Rails, see the rails role
+      # name:s need to be unique, as they share the common appshome directory
+      #
+      # sites: *forces* the app to be hosted *only* via specific URLs i.e. "ab.com www.t2.com"
+      # name: is used (in the absence of sites:) to define *also* the domain used for hosting,
+      #   i.e. a name: xxx.com will host the project under xxx.com *and* www.xxx.com URLs
+      # alias: is used (together with sites: or name:) to specify additional domains / URLs
+      #   i.e. an alias: "t1.co t2.co" will host the app under both t?.co *and* www.t?.co URLs
+      #
+      # sync: xxx if present! extracts all files matching *xxx* from tarsnap/backup
+      #   mysqldb-tarsnap and uploads-tarsnap tasks will use these *xxx* files!
+      #   with backup_fast:
+      #       mysqld restores the db as found in config/database.yml +branch:
+      #       uploads gets appshome/{{ app.name }} uploads files from backup_fast:
+      #
+      # cron: installs the selected template as daily cronjob
+      # uploads: restores user uploads for the designated app
+      # branch: deploys the desired branch instead of master
+
+      apps:
+        - {
+          # Example 1, rails code deployed from repo:, restore db, no uploads:
+          name: reddrill.com,
+          repo: "git@bitbucket.org:aimget/reddrill.git",
+          sync: reddrill
+          }
+
+      # web apps, coded with https://middlemanapp.com/, see the middleman role
+      # name:s need to be unique, as they share the common appshome directory
+      #
+      # sites: *forces* the app to be hosted *only* via specific URLs i.e. "ab.com www.t2.com"
+      # name: is used (in the absence of sites:) to define *also* the domain used for hosting,
+      #   i.e. a name: xxx.com will host the project under xxx.com *and* www.xxx.com URLs
+      # alias: is used (together with sites: or name:) to specify additional domains / URLs
+      #   i.e. an alias: "t1.co t2.co" will host the app under both t?.co *and* www.t?.co URLs
+      #
+      # cron: not supported yet
+      # branch: deploys the desired branch instead of master
+
+      www:
+        - {
+          # Example 2, middleman code deployed from repo:, additional alias:
+          name: tacsi.fi,
+          repo: "git@bitbucket.org:aimget/tacsi.git",
+          alias: tacsi.co
+          }
+
+      # html sites, plain html, static, deploys only their git /html directory
+      # name:s need to be unique, as they share the common appshome directory
+      #
+      # sites: name: alias: behave as described above in all the other web apps
+      # cron: not supported yet
+      # branch: deploys the desired branch instead of master
+
+      html:
+        - {
+          # Example 3, plain/html site deployed from repo:, no extras
+          name: lunch-roulette.org,
+          repo: "git@bitbucket.org:aimget/roulette.git"
+          }

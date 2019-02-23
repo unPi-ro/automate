@@ -1,0 +1,56 @@
+---
+# proper locale is required for tarsnap to grab all (possible) filenames
+- name: setting the locale to en_US
+  shell: localedef -i en_US -f UTF-8 en_US.UTF-8
+
+- name: fixing root's locale
+  blockinfile:
+    path: /root/.bashrc
+    create: yes
+    block: |
+      export LANGUAGE=en_US.UTF-8
+      export LANG=en_US.UTF-8
+      export LC_ALL=en_US.UTF-8
+
+- name: adding tarsnap package key
+  apt_key:
+    url: https://pkg.tarsnap.com/tarsnap-deb-packaging-key.asc
+    state: present
+
+- name: creating /etc/apt/sources.list.d/tarsnap.list
+  copy:
+    dest: /etc/apt/sources.list.d/tarsnap.list
+    content: "deb http://pkg.tarsnap.com/deb/{{ ansible_distribution_release }} ./"
+
+- name: installing tarsnap and its keyring
+  apt:
+    name: tarsnap,tarsnap-archive-keyring
+    update_cache: yes
+
+- name: uploading (own) tarsnap storage key
+  copy:
+    src: "files/{{ inventory_hostname }}-tarsnap.key"
+    dest: "/root/{{ inventory_hostname }}-tarsnap.key"
+    mode: 0600
+
+- name: uploading (seed/restore) tarsnap storage key
+  copy:
+    src: "files/{{ service.seed }}-tarsnap.key"
+    dest: "/root/{{ service.seed }}-tarsnap.key"
+    mode: 0600
+
+- name: symlinking tarsnap.key to seed/restore key
+  file:
+    src: "/root/{{ service.seed }}-tarsnap.key"
+    dest: /root/tarsnap.key
+    state: link
+    force: yes
+
+- name: "securing {{ backup_root }}/backup directory before restores"
+  file:
+    dest: "{{ backup_root }}/backup"
+    mode: u=rwx,g=,o=
+    state: directory
+
+- name: enabling backup support
+  set_fact: backup=true

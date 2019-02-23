@@ -1,0 +1,14 @@
+---
+- name: "preparing rails app directory on {{ inventory_hostname }}"
+  file:
+    dest: "{{ appshome }}/{{ app.name }}"
+    mode: u=rwx,g=rx,o=rx
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    state: directory
+
+- name: "preparing web logs directory on {{ inventory_hostname }}"
+  file:
+    dest: "{{ logroot }}/{{ app.name }}"
+    mode: u=rwx,g=rx,o=rx
+    state: directory

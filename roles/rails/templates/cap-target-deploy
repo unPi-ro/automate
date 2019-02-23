@@ -1,0 +1,4 @@
+server '{{ inventory_hostname }}', user: '{{ deploy_user }}', roles: %w{web app}
+set :deploy_to, "{{ appshome }}/{{ app.name }}"
+set :rails_env, :{{ app.branch | default('production') }}
+set :branch, "{{ app.branch | default('master') }}"

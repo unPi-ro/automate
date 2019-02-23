@@ -1,0 +1,69 @@
+---
+- name: installing opendkim
+  apt:
+    name: opendkim,opendkim-tools
+
+- name: creating /etc/postfix/opendkim
+  file:
+    path: /etc/postfix/opendkim
+    mode: u=rwx,g=rx
+    owner: root
+    group: opendkim
+    state: directory
+
+- name: "generating a dkim key for {{ inventory_hostname }}"
+  shell: "opendkim-genkey -D /etc/postfix/opendkim/ -d {{ inventory_hostname }} -s {{ inventory_hostname_short }}"
+  args:
+    creates: "/etc/postfix/opendkim/{{ inventory_hostname_short }}.private"
+
+- name: updating opendkim.conf
+  template:
+    src: opendkim.conf
+    dest: /etc/opendkim.conf
+    mode: a+r
+
+- name: creating /etc/postfix/opendkim/keytable
+  copy:
+    mode: u+rw,g+r
+    dest: /etc/postfix/opendkim/keytable
+    content: "{{ inventory_hostname_short }}._domainkey.{{ inventory_hostname }} {{ inventory_hostname }}:{{ inventory_hostname_short }}:/etc/postfix/opendkim/{{ inventory_hostname_short}}.private"
+
+- name: creating /etc/postfix/opendkim/signingtable
+  template:
+    src: signingtable
+    dest: /etc/postfix/opendkim/signingtable
+    mode: u+rw,g+r
+
+- name: updating SOCKET in /etc/default/opendkim
+  lineinfile:
+    regexp: '^SOCKET=.*'
+    line: 'SOCKET=inet:8891@localhost'
+    path: /etc/default/opendkim
+
+- name: updating DAEMON_OPTS in /etc/default/opendkim
+  lineinfile:
+    regexp: '^#?DAEMON_OPTS=.*'
+    line: 'DAEMON_OPTS="-l -W -x /etc/opendkim.conf -u opendkim"'
+    path: /etc/default/opendkim
+
+- name: updating access rights on /etc/postfix/opendkim
+  shell: chown -R opendkim /etc/postfix/opendkim
+  args:
+    warn: no
+
+- name: integrating postfix with opendkim
+  shell: |
+    postconf -e 'milter_default_action = accept'
+    postconf -e 'milter_protocol = 2'
+    postconf -e 'smtpd_milters = inet:localhost:8891'
+    postconf -e 'non_smtpd_milters = inet:localhost:8891'
+
+- name: fixing opendkim startup scripts
+  shell: |
+    /lib/opendkim/opendkim.service.generate
+    systemctl daemon-reload
+
+- name: restarting opendkim
+  service:
+    name: opendkim
+    state: restarted

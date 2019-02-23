@@ -1,0 +1,12 @@
+{{ appshome }}/{{ app.name }}/shared/log/*.log {
+    missingok
+    notifempty
+    compress
+    copytruncate
+    weekly
+    rotate 10
+    create 0644 {{ deploy_user }} {{ deploy_user }}
+    postrotate
+           passenger-config restart-app {{ appshome }}/{{ app.name }}/current
+    endscript
+}

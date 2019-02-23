@@ -1,0 +1,29 @@
+server {
+{% if usessl is defined and usessl|bool %}
+        # enforcing HTTP as default for all sites
+        listen 80 default_server backlog=4096;
+        listen [::]:80 default_server backlog=4096;
+{% endif %}
+
+        root {{ wwwroot }};
+
+        server_name _;
+
+{% if usessl is defined and usessl|bool %}
+        # making sure we're not serving an index page
+        index index.htmlx;
+
+        error_page 404 =301 https://$host$request_uri;
+        error_page 403 =301 https://$host$request_uri;
+
+        # try to serve Letsencrypt challenges if found, else redirect to HTTPS
+{% else %}
+        index index.html index.nginx-debian.html;
+{% endif %}
+
+        location / {
+                # First attempt to serve request as file, then
+                # as directory, then fall back to displaying a 404.
+                try_files $uri $uri/ =404;
+        }
+}

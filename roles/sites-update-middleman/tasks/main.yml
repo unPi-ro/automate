@@ -1,0 +1,9 @@
+---
+- name: populating server_names
+  include_tasks: servernames.yml
+
+- name: "creating required directories for {{ app.name }}"
+  include_tasks: dirs.yml
+
+- name: "creating/updating nginx site configuration for {{ app.name }}"
+  include_tasks: sites.yml

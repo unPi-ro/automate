@@ -1,0 +1,90 @@
+---
+- name: installing required packages for certbot
+  apt:
+    name:
+      - openssl
+      - python-boto
+      - python-openssl
+    state: present
+
+- name: "creating the {{ certroot }} directory for {{ app.name }}"
+  file:
+    path: "{{ certroot }}/{{ app.name }}"
+    state: directory
+    mode: 0755
+
+- name: "creating the {{ certackdir }} directory under {{ wwwroot }}"
+  file:
+    path: "{{ wwwroot }}/{{ certackdir }}"
+    state: directory
+    mode: 0755
+
+- name: "generating the private key for {{ app.name }}"
+  openssl_privatekey:
+    path: "{{ certroot + '/' + app.name + '/privkey.pem' }}"
+
+- name: "initializing alt names for {{ app.name }}"
+  set_fact: alt_names=""
+
+- name: "populating 1st item to alt names for {{ app.name }}"
+  set_fact: alt_names="DNS:{{ item }}"
+  when: "server_names.split(' ') | length >= 1"
+  with_items:
+    - "{{ server_names.split(' ') | first }}"
+
+- name: "populating 2nd+ items to alt names for {{ app.name }}"
+  set_fact: alt_names="{{ alt_names }} DNS:{{ item }}"
+  when: "server_names.split(' ') | length > 1"
+  with_items:
+    - "{{ server_names.split(' ')[1:] }}"
+
+- name: "generating the CSR for {{ app.name }}"
+  openssl_csr:
+    email_address: "{{ certemail }}"
+    key_usage: "{{ certusage }}"
+    path: "{{ certroot + '/' + app.name + '/request.csr' }}"
+    privatekey_path: "{{ certroot + '/' + app.name + '/privkey.pem' }}"
+    CN: "{{ server_names.split(' ') | first }}"
+    subject_alt_name: "{{ alt_names.split(' ') }}"
+    subject_alt_name_critical: true
+  register: csr_results
+
+- name: "initiating the Let's Encrypt challenge for {{ app.name }}"
+  acme_certificate:
+    acme_version: "{{ certversion }}"
+    terms_agreed: yes
+    acme_directory: "https://acme-v0{{ certversion }}.api.letsencrypt.org/directory"
+    account_key_content: "{{ lookup('file', certacckey) }}"
+    challenge: "http-01"
+    csr: "{{ certroot + '/' + app.name + '/request.csr' }}"
+    cert: "{{ certroot + '/' + app.name + '/request.crt' }}"
+    account_email: "{{ certemail }}"
+    remaining_days: "{{ certdays }}"
+  register: lets_encrypt_challenge
+
+- name: "creating answers to the {{ app.name }} challenges in the {{ wwwroot }}"
+  when: lets_encrypt_challenge is changed
+  copy:
+    dest: "{{ wwwroot }}/{{ lets_encrypt_challenge['challenge_data'][item]['http-01']['resource'] }}"
+    content: "{{ lets_encrypt_challenge['challenge_data'][item]['http-01']['resource_value'] }}"
+  loop: "{{ server_names.split(' ') }}"
+
+- name: "validating and retrieving the SSL cert(s) for {{ app.name }}"
+  acme_certificate:
+    acme_version: "{{ certversion }}"
+    terms_agreed: yes
+    acme_directory: "https://acme-v0{{ certversion }}.api.letsencrypt.org/directory"
+    account_key_content: "{{ lookup('file', certacckey) }}"
+    account_email: "{{ certemail }}"
+    csr: "{{ certroot + '/' + app.name + '/request.csr' }}"
+    cert: "{{ certroot + '/' + app.name + '/request.crt' }}"
+    fullchain: "{{ certroot + '/' + app.name + '/fullchain.pem' }}"
+    chain: "{{ certroot + '/' + app.name + '/intermediate.pem' }}"
+    challenge: http-01
+    remaining_days: "{{ certdays }}"
+    data: "{{ lets_encrypt_challenge }}"
+  register: lets_encrypt_cert
+
+- name: trigger nginx reloading
+  set_fact: reload=true
+  when: lets_encrypt_cert is changed

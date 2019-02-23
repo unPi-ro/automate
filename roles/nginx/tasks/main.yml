@@ -1,0 +1,41 @@
+---
+- name: installing passenger
+  apt:
+    name: libnginx-mod-http-passenger
+  when: passenger is defined
+
+- name: installing bundler
+  apt:
+    name: bundler
+
+- name: installing nginx light
+  apt:
+    name: nginx-light
+
+- name: removing default (enabled) nginx site
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+
+- name: enabling the new nginx 00default site
+  file:
+    src: "/etc/nginx/sites-available/default"
+    dest: "/etc/nginx/sites-enabled/00default"
+    state: link
+    force: yes
+
+- name: restarting nginx
+  service:
+    name: nginx
+    state: restarted
+
+- name: allowing incoming HTTP traffic
+  shell: ufw allow http
+  when: firewall is defined
+
+- name: allowing incoming HTTPS traffic
+  shell: ufw allow https
+  when: firewall is defined
+
+- name: enabling nginx support
+  set_fact: nginx=true

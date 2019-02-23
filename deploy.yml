@@ -1,0 +1,9 @@
+---
+- hosts: "{{ target }}"
+  tasks:
+    - name: services -> loop
+      include_role:
+        name: "{{ service.name }}"
+      loop: "{{ services | list }}"
+      loop_control:
+        loop_var: service

@@ -1,0 +1,27 @@
+---
+- name: validating your ansible version
+  assert:
+    that: "ansible_version.full is version_compare('2.7', '>=')"
+    msg: "OOPS, you need at least ansible 2.7.0 to run automate"
+
+- name: validating target OS
+  assert:
+    that: service.os == ansible_distribution
+    msg: "OOPS, unfortunately target OS/{{ ansible_distribution }} is not supported/{{ service.os }}"
+
+- name: checking the existence of (local) rvm
+  connection: local
+  shell: which rvm
+
+- name: on a Mac with brew? installing node & mysql & imagemagick
+  connection: local
+  shell: which brew && brew install node mysql imagemagick || true
+
+# required by local ruby/bundler
+- name: "purge the locally cached SSH server key for {{ inventory_hostname }}"
+  connection: local
+  shell: "ssh-keygen -R {{ inventory_hostname }}"
+
+- name: "purge the locally cached SSH server key for {{ inventory_hostname }} IPv4"
+  connection: local
+  shell: "ssh-keygen -R $(host {{ inventory_hostname }} | grep 'has address' | cut -d' ' -f4)"

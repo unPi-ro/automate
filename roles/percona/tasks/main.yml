@@ -1,0 +1,71 @@
+---
+- name: removing percona-release if exists
+  apt:
+    name: percona-release
+    state: absent
+
+- name: installing latest percona repository
+  apt:
+    deb: "https://repo.percona.com/apt/percona-release_latest.{{ ansible_distribution_release }}_all.deb"
+
+- name: running apt-get update
+  apt:
+    update_cache: yes
+
+- name: seeding mysql/root password
+  shell: "echo 'percona-server-server-{{ service.version }} percona-server-server-{{ service.version }}/root-pass password {{ service.password }}' | debconf-set-selections"
+
+- name: seeding mysql/root password re-type
+  shell: "echo 'percona-server-server-{{ service.version }} percona-server-server-{{ service.version }}/re-root-pass password {{ service.password }}' | debconf-set-selections"
+
+- name: seeding root's .my.cnf
+  copy:
+    dest: /root/.my.cnf
+    mode: 0600
+    content: |
+      [client]
+      user=root
+      password={{ service.password }}
+      [mysqldump]
+      user=root
+      password={{ service.password }}
+
+- name: installing percona mysql
+  apt:
+    name:
+     - "percona-server-common-{{ service.version }}"
+     - "percona-server-client-{{ service.version }}"
+     - "percona-server-server-{{ service.version }}"
+    state: present
+
+- name: installing percona mysql client 5.7 development files
+  apt: name=libperconaserverclient20-dev
+  when: service.version == "5.7"
+
+- name: installing percona mysql client 5.6 development files
+  apt: name=libperconaserverclient18.1-dev
+  when: service.version == "5.6"
+
+- name: installing percona mysql client 5.5 development files
+  apt: name=libperconaserverclient18-dev
+  when: service.version == "5.5"
+
+- name: deploying the tune-mysqld profile
+  register: tuned
+  template:
+    src: tune-mysqld.cnf
+    dest: /etc/mysql/conf.d/tune-mysqld.cnf
+    mode: a+r
+
+- name: restarting mysqld
+  when: tuned.changed
+  service:
+    name: mysql
+    state: restarted
+
+- name: installing percona-xtrabackup-24
+  apt:
+    name: percona-xtrabackup-24
+
+- name: enabling mysql support
+  set_fact: mysql=true

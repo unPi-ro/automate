@@ -1,0 +1,36 @@
+---
+- name: "detecting the last backup/tarsnap archive"
+  when: app.sync is defined and tararch|bool
+  shell: "tarsnap --list-archives | sort | tail -n 1"
+  register: tarlist
+
+- name: setting tararch to the very last tarsnap archive
+  set_fact: tararch="{{ tarlist.stdout }}"
+  when: tarlist|changed
+
+# do not execute this task if it was executed already elsewhere, i.e. uploads-tar
+- name: "restoring *{{ app.sync }}* files from backup/tarsnap"
+  when: app.sync is defined and tarex|bool
+  shell: "LC_ALL=en_US.UTF-8 tarsnap -xvf {{ tararch }} --include='*{{ app.sync }}*' -C {{ backup_root }}"
+  args:
+    executable: /bin/bash
+  register: tarex
+
+- name: "creating mysql database for {{ app.name }}"
+  mysql_db:
+    name: "{{ dbname }}"
+    state: present
+
+- name: "creating mysql user for {{ app.name }}"
+  mysql_user:
+    name: "{{ dbuser }}"
+    password: "{{ dbpass }}"
+    priv: '{{ dbname }}.*:ALL'
+    state: present
+
+- name: "restoring {{ dbname }} database data from backup/tarsnap"
+  when: app.sync is defined
+  mysql_db:
+    name: "{{ dbname }}"
+    state: import
+    target: "{{ backup_root }}/backup/mysqldump/full.{{ dbname }}.sql"

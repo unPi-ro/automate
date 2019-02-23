@@ -1,0 +1,11 @@
+---
+- name: generating SSL names for the certificate
+  set_fact: server_names="{{ inventory_hostname }}"
+
+# hacking vars / app.name to be used in the already coded certs.yml
+- name: "temporarily setting app.name to {{ inventory_hostname }}"
+  set_fact:
+    app: { name: "{{ inventory_hostname }}" }
+
+- name: "creating/updating SSL certs for {{ app.name }}"
+  include_tasks: certs.yml

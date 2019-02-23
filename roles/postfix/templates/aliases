@@ -1,0 +1,12 @@
+nobody: root
+
+mailer-daemon: postmaster
+
+postmaster: root
+hostmaster: root
+webmaster: root
+abuse: root
+security: root
+admin: root
+
+root: alerting+{{ inventory_hostname }}@mycompany.com

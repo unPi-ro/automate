@@ -1,0 +1,110 @@
+- name: "cloning (locally) the repository for {{ app.name }}"
+  connection: local
+  git:
+    force: yes
+    depth: 1
+    repo: "{{ app.repo }}"
+    ssh_opts: "-o StrictHostKeyChecking=no"
+    version: "{{ app.branch | default('master') }}"
+    dest: "{{ temphome }}/{{ app.name }}"
+
+- name: "running (locally) bundle install for {{ app.name }}"
+  connection: local
+  shell: bundle install
+  args:
+    chdir: "{{ temphome }}/{{ app.name }}"
+
+- name: "creating required directories for {{ app.name }}"
+  include_tasks: dirs.yml
+
+- name: "reading rails (db) settings for {{ app.name }}"
+  include_vars:
+    file: "{{ temphome }}/{{ app.name }}/config/database.yml"
+    name: imported
+
+- name: "setting production database name for {{ app.name }}"
+  set_fact: dbname="{{ imported.production.database }}"
+
+- name: "setting production database user for {{ app.name }}"
+  set_fact: dbuser="{{ imported.production.username }}"
+
+- name: "setting production database pass for {{ app.name }}"
+  set_fact: dbpass="{{ imported.production.password }}"
+
+- name: "checking if {{ app.branch }} db configuration is defined"
+  when: app.branch is defined
+  assert:
+    that: imported[app.branch] is defined
+    msg: "OOPS, please define a db configuration named {{ app.branch }}"
+
+- name: "setting custom database for {{ app.branch }} branch"
+  when: app.branch is defined
+  set_fact: dbname="{{ imported[app.branch].database }}"
+
+- name: "setting custom db/user for {{ app.branch }} branch"
+  when: app.branch is defined
+  set_fact: dbuser="{{ imported[app.branch].username }}"
+
+- name: "setting custom db/pass for {{ app.branch }} branch"
+  when: app.branch is defined
+  set_fact: dbpass="{{ imported[app.branch].password }}"
+
+- name: "fast restoring mysqldb for {{ app.name }}"
+  include_tasks: mysqldb.yml
+  when: mysql is defined and backup_fast is defined
+
+- name: guarding against repeated extraction from tarsnap
+  set_fact: tararch=true tarex=true
+
+- name: "restoring mysqldb from backup/tarsnap for {{ app.name }}"
+  include_tasks: mysqldb-tarsnap.yml
+  when: mysql is defined and backup is defined and backup_fast is not defined
+
+- name: "restoring uploads for {{ app.name }}"
+  include_tasks: uploads.yml
+  when: backup_fast is defined and app.uploads is defined and app.uploads|bool
+
+- name: "restoring uploads from backup/tarsnap for {{ app.name }}"
+  include_tasks: uploads-tarsnap.yml
+  when: backup is defined and backup_fast is not defined
+    and app.uploads is defined and app.uploads|bool and app.sync is defined
+
+- name: populating server_names
+  include_tasks: servernames.yml
+
+- name: "creating/updating SSL certs for {{ app.name }}"
+  when: usessl is defined and usessl|bool
+  include_tasks: certs.yml
+
+- name: "creating/updating nginx site configuration for {{ app.name }}"
+  include_tasks: sites.yml
+
+- name: "creating config/deploy/target.rb for {{ app.name }}"
+  connection: local
+  template:
+    src: cap-target-deploy
+    dest: "{{ temphome }}/{{ app.name }}/config/deploy/target.rb"
+
+- name: "running 'cap target deploy' for {{ app.name }}"
+  connection: local
+  shell: cap target deploy
+  args:
+    chdir: "{{ temphome }}/{{ app.name }}"
+
+- name: "creating daily reporting cronjob for {{ app.name }}"
+  when: app.cron is defined and active is defined and active|bool
+  template:
+    src: "{{ app.cron }}"
+    dest: "/etc/cron.daily/{{ app.name }}"
+    mode: a+rx
+
+- name: "creating logrotate config for {{ app.name }}"
+  template:
+    src: logrotate
+    dest: "/etc/logrotate.d/{{ app.name }}"
+
+- name: reloading nginx
+  when: nginx is defined
+  service:
+    name: nginx
+    state: reloaded

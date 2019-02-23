@@ -1,0 +1,100 @@
+- name: "cloning (locally) the repository for {{ app.name }}"
+  connection: local
+  git:
+    force: yes
+    depth: 1
+    repo: "{{ app.repo }}"
+    ssh_opts: "-o StrictHostKeyChecking=no"
+    version: "{{ app.branch | default('master') }}"
+    dest: "{{ temphome }}/{{ app.name }}"
+
+- name: "updating the deploy.method for {{ app.name }}"
+  connection: local
+  lineinfile:
+    backrefs: yes
+    regexp: '^(\s+)deploy.method\s+=\s+"'
+    line: '\1deploy.method = :sftp'
+    path: "{{ temphome }}/{{ app.name }}/config.rb"
+
+- name: "updating the deploy.user for {{ app.name }}"
+  connection: local
+  lineinfile:
+    backrefs: yes
+    regexp: '^(\s+)deploy.user\s+=\s+"'
+    line: '\1deploy.user = "{{ ansible_user }}"'
+    path: "{{ temphome }}/{{ app.name }}/config.rb"
+
+- name: "updating the deploy.host for {{ app.name }}"
+  connection: local
+  lineinfile:
+    backrefs: yes
+    regexp: '^(\s+)deploy.host\s+=\s+"'
+    line: '\1deploy.host = "{{ inventory_hostname }}"'
+    path: "{{ temphome }}/{{ app.name }}/config.rb"
+
+- set_fact: releasenow="{{ ansible_date_time.iso8601_basic_short }}"
+
+- name: "updating the deploy.path for {{ app.name }}"
+  connection: local
+  lineinfile:
+    backrefs: yes
+    regexp: '^(\s+)deploy.path\s+=\s+"'
+    line: '\1deploy.path = "{{ appshome }}/{{ app.name }}/releases/{{ releasenow }}"'
+    path: "{{ temphome }}/{{ app.name }}/config.rb"
+
+- name: "updating the deploy.port for {{ app.name }}"
+  connection: local
+  lineinfile:
+    backrefs: yes
+    regexp: '^(\s+)deploy.port\s+=\s+"'
+    line: '\1deploy.port = 22'
+    path: "{{ temphome }}/{{ app.name }}/config.rb"
+
+- name: "running bundle install for {{ app.name }}"
+  connection: local
+  shell: bundle install
+  args:
+    chdir: "{{ temphome }}/{{ app.name }}"
+
+- name: "running middleman build for {{ app.name }}"
+  connection: local
+  shell: bundle exec middleman build
+  args:
+    chdir: "{{ temphome }}/{{ app.name }}"
+
+- name: "populating required directories for {{ app.name }}"
+  include_tasks: dirs.yml
+
+- name: "running middleman deploy for {{ app.name }}"
+  connection: local
+  shell: bundle exec middleman deploy
+  args:
+    chdir: "{{ temphome }}/{{ app.name }}"
+
+- name: "pruning older {{ app.name }} releases, minus the active one"
+  shell: |
+    find {{ appshome }}/{{ app.name }}/releases -maxdepth 1 -name "20*" | sort -r | tail -n +6 |
+    grep -v "$(readlink {{ appshome }}/{{ app.name }}/current)" | xargs rm -rf
+
+- name: "symlinking current web app directory on {{ inventory_hostname }}"
+  file:
+    src: "{{ appshome }}/{{ app.name }}/releases/{{ releasenow }}"
+    dest: "{{ appshome }}/{{ app.name }}/current"
+    force: yes
+    state: link
+
+- name: populating server_names
+  include_tasks: servernames.yml
+
+- name: "creating/updating SSL certs for {{ app.name }}"
+  when: usessl is defined and usessl|bool
+  include_tasks: certs.yml
+
+- name: "creating/updating nginx site configuration for {{ app.name }}"
+  include_tasks: sites.yml
+
+- name: reloading nginx
+  when: nginx is defined
+  service:
+    name: nginx
+    state: reloaded

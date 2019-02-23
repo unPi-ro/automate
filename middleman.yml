@@ -1,0 +1,10 @@
+---
+- hosts: "{{ target }}"
+  tasks:
+
+    - name: allowing nginx reloading
+      set_fact: nginx=true
+
+    - name: executing middleman deployments
+      include_role:
+        name: middleman

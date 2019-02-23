@@ -1,0 +1,23 @@
+---
+- name: installing dependencies
+  include_tasks: deps.yml
+
+- name: "updating nginx (default) site definition"
+  when: nginx is defined
+  template:
+    src: nginx-default-site
+    dest: "/etc/nginx/sites-available/default"
+    mode: a+r
+
+- name: removing default (enabled) nginx site
+  when: nginx is defined
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+
+- name: building & deploying the rails apps
+  include_tasks: build.yml
+  when: filter is not defined or filter in app.name
+  loop: "{{ apps | list }}"
+  loop_control:
+    loop_var: app

@@ -1,0 +1,117 @@
+---
+- name: seeding initial postfix configuration
+  shell: |
+    echo '
+    postfix	postfix/chattr	boolean	false
+    postfix	postfix/mynetworks	string	127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128
+    postfix	postfix/rfc1035_violation	boolean	false
+    postfix	postfix/destinations	string	$myhostname, {{ inventory_hostname }}, localhost.localdomain, localhost
+    postfix	postfix/bad_recipient_delimiter	error
+    postfix	postfix/protocols	select	ipv4
+    postfix	postfix/mailname	string	{{ inventory_hostname }}
+    postfix	postfix/lmtp_retired_warning	boolean	true
+    postfix	postfix/main_mailer_type	select	Internet Site
+    postfix	postfix/dynamicmaps_conversion_warning	boolean
+    postfix	postfix/mailbox_limit	string	0
+    postfix	postfix/root_address	string
+    postfix	postfix/procmail	boolean	false
+    postfix	postfix/main_cf_conversion_warning	boolean	true
+    postfix	postfix/tlsmgr_upgrade_warning	boolean
+    postfix	postfix/relayhost	string
+    postfix	postfix/relay_restrictions_warning	boolean
+    postfix	postfix/mydomain_warning	boolean
+    postfix	postfix/compat_conversion_warning	boolean	true
+    postfix	postfix/sqlite_warning	boolean
+    postfix	postfix/kernel_version_warning	boolean
+    postfix	postfix/retry_upgrade_warning	boolean
+    postfix	postfix/recipient_delim	string	+
+    postfix	postfix/not_configured	error
+    ' | debconf-set-selections
+
+- name: installing postfix & mutt
+  apt:
+    name: postfix,mutt
+
+- set_fact: dossl=false
+
+- name: "enabling dossl when usessl is true"
+  set_fact: dossl=true
+  when: usessl is defined and usessl|bool
+
+- name: "enabling dossl when service.enforcessl is true"
+  set_fact: dossl=true
+  when: service.enforcessl is defined and service.enforcessl|bool
+
+- name: "updating nginx (default) site definition"
+  when: nginx is defined and dossl|bool
+  template:
+    src: nginx-default-site
+    dest: "/etc/nginx/sites-available/default"
+    mode: a+r
+
+- name: "enabling nginx default site"
+  when: nginx is defined and dossl|bool
+  file:
+    src: "/etc/nginx/sites-available/default"
+    dest: "/etc/nginx/sites-enabled/00default"
+    state: link
+    force: yes
+
+- name: generating SSL names for the certificate
+  set_fact: server_names="{{ inventory_hostname }}"
+  when: service.ssl is not defined and dossl|bool
+
+# hacking vars / app.name to be used in the already coded certs.yml
+- name: "temporarily setting app.name to {{ inventory_hostname }}"
+  set_fact:
+    app: { name: "{{ inventory_hostname }}" }
+  when: service.ssl is not defined and dossl|bool
+
+- name: "creating/updating SSL certs for {{ app.name }}"
+  include_tasks: certs.yml
+  when: service.ssl is not defined and dossl|bool
+
+- name: mask nginx reloading
+  set_fact: reload=false
+  when: service.ssl is not defined and dossl|bool
+
+- set_fact: sslname="{{ service.ssl }}"
+  when: service.ssl is defined
+
+- set_fact: sslname="{{ app.name }}"
+  when: service.ssl is not defined and dossl|bool
+
+- name: securing the postfix installation
+  when: dossl|bool
+  shell: |
+    postconf -e 'smtpd_tls_cert_file = {{ certroot }}/{{ sslname }}/fullchain.pem'
+    postconf -e 'smtpd_tls_key_file = {{ certroot }}/{{ sslname }}/privkey.pem'
+    postconf -e 'smtpd_sasl_type = dovecot'
+    postconf -e 'smtpd_sasl_path = private/auth'
+    postconf -e 'smtpd_sasl_local_domain ='
+    postconf -e 'smtpd_sasl_security_options = noanonymous'
+    postconf -e 'broken_sasl_auth_clients = yes'
+    postconf -e 'smtpd_sasl_auth_enable = yes'
+    postconf -e 'smtpd_recipient_restrictions = permit_sasl_authenticated,permit_mynetworks,reject_unauth_destination'
+    postconf -e 'smtp_tls_security_level = may'
+    postconf -e 'smtpd_tls_security_level = may'
+    postconf -e 'smtp_tls_note_starttls_offer = yes'
+    postconf -e 'smtpd_tls_loglevel = 1'
+    postconf -e 'smtpd_tls_received_header = yes'
+
+- name: creating global email aliases
+  template:
+    src: aliases
+    dest: /etc/aliases
+    mode: a+r
+
+- name: hashing global email aliases
+  shell: postalias /etc/aliases
+
+- name: preparing opendkim integration
+  include_tasks: opendkim.yml
+
+- name: restarting postfix
+  service:
+    name: postfix
+    state: restarted

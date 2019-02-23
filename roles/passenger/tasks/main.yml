@@ -1,0 +1,19 @@
+---
+- name: installing required packages
+  apt:
+    name: dirmngr,gnupg,apt-transport-https,ca-certificates
+
+- name: adding apt key for passenger
+  shell: apt-key adv --no-tty --keyserver keyserver.ubuntu.com --recv 561F9B9CAC40B2F7
+
+- name: creating /etc/apt/sources.list.d/passenger.list
+  copy:
+    dest: /etc/apt/sources.list.d/passenger.list
+    content: "deb https://oss-binaries.phusionpassenger.com/apt/passenger {{ ansible_distribution_release }} main"
+
+- name: apt-get update
+  apt:
+    update_cache: yes
+
+- name: enabling passenger installation
+  set_fact: passenger=true

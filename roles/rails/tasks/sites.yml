@@ -1,0 +1,43 @@
+---
+- name: "updating nginx (default) site definition"
+  register: site2default
+  when: nginx is defined
+  template:
+    src: nginx-default-site
+    dest: "/etc/nginx/sites-available/default"
+    mode: a+r
+
+- name: removing default (enabled) nginx site
+  when: nginx is defined
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+
+- name: "enabling nginx default site"
+  when: nginx is defined
+  file:
+    src: "/etc/nginx/sites-available/default"
+    dest: "/etc/nginx/sites-enabled/00default"
+    state: link
+    force: yes
+
+- name: "uploading nginx site definition for {{ app.name }}"
+  register: site2upload
+  when: nginx is defined
+  template:
+    src: nginx-rails-site
+    dest: "/etc/nginx/sites-available/{{ app.name }}"
+    mode: a+r
+
+- name: "enabling nginx site for {{ app.name }}"
+  register: site2enable
+  when: nginx is defined
+  file:
+    src: "/etc/nginx/sites-available/{{ app.name }}"
+    dest: "/etc/nginx/sites-enabled/{{ app.name }}"
+    state: link
+    force: yes
+
+- name: trigger nginx reloading
+  set_fact: reload=true
+  when: site2default is changed or site2upload is changed or site2enable is changed

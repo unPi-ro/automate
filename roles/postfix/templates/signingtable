@@ -1,0 +1,2 @@
+# Domain {{ inventory_hostname }}
+*@{{ inventory_hostname }} {{ inventory_hostname_short }}._domainkey.{{ inventory_hostname }}

@@ -1,0 +1,42 @@
+---
+- name: "preparing web app directory on {{ inventory_hostname }}"
+  file:
+    dest: "{{ appshome }}/{{ app.name }}/releases/"
+    mode: u=rwx,g=rx,o=rx
+    recurse: yes
+    state: directory
+
+- name: "preparing current web app directory on {{ inventory_hostname }}"
+  file:
+    dest: "{{ appshome }}/{{ app.name }}/current"
+    mode: u=rwx,g=rx,o=rx
+    state: directory
+
+- name: "preparing web logs directory on {{ inventory_hostname }}"
+  file:
+    dest: "{{ logroot }}/{{ app.name }}"
+    mode: u=rwx,g=rx,o=rx
+    state: directory
+
+- name: updating the (nginx) logrotate logic for web logs
+  when: nginx is defined
+  lineinfile:
+    regexp: ".var.log.nginx."
+    line: "{{ logroot }}/*/*.log /var/log/nginx/*.log {"
+    path: /etc/logrotate.d/nginx
+
+- name: updating the (nginx) logrotate from daily to weekly for web logs
+  when: nginx is defined
+  lineinfile:
+    backrefs: yes
+    regexp: '(\s+)daily'
+    line: '\1weekly'
+    path: /etc/logrotate.d/nginx
+
+- name: updating the (nginx) logrotate keep 10 weeks for web logs
+  when: nginx is defined
+  lineinfile:
+    backrefs: yes
+    regexp: '(\s+)rotate\s+14'
+    line: '\1rotate 10'
+    path: /etc/logrotate.d/nginx

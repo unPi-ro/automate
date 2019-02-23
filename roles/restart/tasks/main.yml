@@ -1,0 +1,44 @@
+---
+- name: symlinking tarsnap.key to server's own key
+  file:
+    src: "/root/{{ inventory_hostname }}-tarsnap.key"
+    dest: /root/tarsnap.key
+    state: link
+    force: yes
+  when: backup is defined
+
+- name: uploading the tarsnap backup script
+  when: backup is defined
+  template:
+    src: "files/tarsnap-backup.sh"
+    dest: "/root/tarsnap-backup.sh"
+    mode: 0700
+
+- name: uploading the tarsnap rotate script
+  when: backup is defined
+  template:
+    src: "files/tarsnap-rotate.sh"
+    dest: "/root/tarsnap-rotate.sh"
+    mode: 0700
+
+- name: creating the nightly backup cronjob
+  when: backup is defined and active is defined and active|bool
+  template:
+    src: files/nightly-backup-runs
+    dest: /etc/cron.d/nightly-backup-runs
+    mode: a+r
+
+- name: setting the crontab MAILTO address
+  lineinfile:
+    backrefs: yes
+    regexp: "^SHELL=(.*)"
+    line: 'MAILTO={{ notifyemail }}\n\n SHELL=\1'
+    path: /etc/crontab
+
+- name: restarting the server in 3 minutes
+  shell: shutdown -r +3
+  when: service.enforce | bool
+
+- name: enabling ufw (uncomplicated firewall)
+  shell: yes | ufw enable
+  when: firewall is defined

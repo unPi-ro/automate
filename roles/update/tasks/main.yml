@@ -1,0 +1,76 @@
+---
+- name: "installing local ruby {{ rvm_ruby }} via rvm"
+  shell: "rvm install ruby-{{ rvm_ruby }}"
+  connection: local
+
+- name: "setting local ruby {{ rvm_ruby }} as default via rvm"
+  shell: "rvm --default use ruby-{{ rvm_ruby }}"
+  connection: local
+
+- name: "(re)installing bundler for the local user"
+  shell: gem install bundler --no-rdoc --no-ri
+  connection: local
+
+- name: "(re)installing capistrano for the local user"
+  shell: gem install capistrano --no-rdoc --no-ri
+  connection: local
+
+- name: "finding (local) git clones older than 1 day in {{ temphome }}"
+  connection: local
+  find:
+    paths: "{{ temphome }}"
+    age: 1d
+    file_type: directory
+  register: oldclones
+
+- name: "removing (local) git clones older than 1 day from {{ temphome }}"
+  connection: local
+  file:
+    path: "{{ item.path }}"
+    state: absent
+  with_items: "{{ oldclones.files }}"
+
+- name: "preparing a secure (local) {{ temphome }} directory"
+  connection: local
+  file:
+    dest: "{{ temphome }}"
+    mode: u=rwx,g=,o=
+    state: directory
+
+- name: updating all packages to the latest version
+  apt:
+    upgrade: full
+    update_cache: yes
+
+- name: installing git
+  apt:
+    name: git
+
+- name: setting somaxconn to 4096
+  sysctl:
+    name: net.core.somaxconn
+    value: 4096
+    sysctl_set: yes
+
+- name: setting up authorized keys for root
+  authorized_key:
+    user: root
+    state: present
+    key: '{{ item }}'
+  with_file:
+        - "public-keys/your.ssh.key.here"
+
+- name: "creating the {{ deploy_user }} user"
+  user:
+    name: "{{ deploy_user }}"
+    shell: /bin/bash
+    password_lock: yes
+
+# below keys must all be RSA, as bundler/sftp doesn't know better
+- name: "setting up authorized keys for {{ deploy_user }} user"
+  authorized_key:
+    user: "{{ deploy_user }}"
+    state: present
+    key: '{{ item }}'
+  with_file:
+        - "public-keys/your.ssh.key.here"

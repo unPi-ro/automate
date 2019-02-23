@@ -1,0 +1,20 @@
+---
+- name: installing ntp & ntpdate
+  apt:
+    name: ntp,ntpdate
+
+- name: stopping ntp
+  service:
+    name: ntp
+    state: stopped
+
+- name: syncing clock with ntpdate
+  shell: "ntpdate {{ service.sync }}"
+
+- name: syncing hardware clock
+  shell: hwclock -w
+
+- name: starting ntp
+  service:
+    name: ntp
+    state: started

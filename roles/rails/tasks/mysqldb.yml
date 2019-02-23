@@ -1,0 +1,52 @@
+---
+- name: "installing required python-mysqldb to {{ inventory_hostname }}"
+  when: backup is defined
+  apt:
+    name: python-mysqldb
+
+- name: "installing required python-mysqldb to {{ backup_fast }}"
+  delegate_to: "{{ backup_fast }}"
+  when: backup_fast is defined
+  apt:
+    name: python-mysqldb
+
+- set_fact: timenow="{{ ansible_date_time.iso8601_basic_short }}"
+
+- name: "dumping {{ dbname }} database from {{ backup_fast }}"
+  delegate_to: "{{ backup_fast }}"
+  when: backup_fast is defined
+  mysql_db:
+    name: "{{ dbname }}"
+    state: dump
+    target: "/tmp/dump.{{ dbname }}.{{ timenow }}.sql.bz2"
+
+- name: "rsyncing mysqldump from {{ backup_fast }} over to {{ inventory_host }}"
+  when: backup_fast is defined
+  shell: "rsync -av -e 'ssh -o StrictHostKeyChecking=no' {{ backup_fast }}:/tmp/dump.{{ dbname }}.{{ timenow }}.sql.bz2 /tmp/"
+
+- name: "restoring {{ dbname }} database to {{ inventory_hostname }}"
+  when: backup_fast is defined
+  mysql_db:
+    name: "{{ dbname }}"
+    state: import
+    target: "/tmp/dump.{{ dbname }}.{{ timenow }}.sql.bz2"
+
+- name: "removing mysqldump from {{ backup_fast }}"
+  delegate_to: "{{ backup_fast }}"
+  when: backup_fast is defined
+  file:
+    path: "/tmp/dump.{{ dbname }}.{{ timenow }}.sql.bz2"
+    state: absent
+
+- name: "removing mysqldump from {{ inventory_hostname }}"
+  when: backup_fast is defined
+  file:
+    path: "/tmp/dump.{{ dbname }}.{{ timenow }}.sql.bz2"
+    state: absent
+
+- name: "creating mysql user for {{ app.name }}"
+  mysql_user:
+    name: "{{ dbuser }}"
+    password: "{{ dbpass }}"
+    priv: '{{ dbname }}.*:ALL'
+    state: present

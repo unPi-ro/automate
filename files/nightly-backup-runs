@@ -1,0 +1,6 @@
+# stored in /etc/cron.d/
+# running at 4AM daily
+
+MAILTO={{ notifyemail }}
+
+0 4 * * * root /root/tarsnap-backup.sh

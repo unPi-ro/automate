@@ -1,0 +1,49 @@
+---
+- name: installing required packages
+  apt:
+    name: dirmngr,gnupg,apt-transport-https,ca-certificates,curl,build-essential
+
+- name: adding gpg key for rvm
+  shell: gpg --no-tty --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB
+
+- name: installing rvm
+  shell: "curl -sSL https://get.rvm.io | bash -s stable"
+  args:
+    warn: no
+
+- name: "updating the {{ deploy_user }} user for rvm"
+  user:
+    name: "{{ deploy_user }}"
+    append: yes
+    groups: rvm
+    shell: /bin/bash
+    password_lock: yes
+
+- name: creating /etc/profile.d/rvm_secure_path.sh
+  copy:
+    dest: /etc/profile.d/rvm_secure_path.sh
+    content: "export rvmsudo_secure_path=1"
+
+- name: "installing ruby {{ rvm_ruby }} via rvm"
+  shell: "source /etc/profile.d/rvm.sh; rvm install ruby-{{ rvm_ruby }}"
+  args:
+    executable: /bin/bash
+
+- name: "setting ruby {{ rvm_ruby }} as default via rvm"
+  shell: "source /etc/profile.d/rvm.sh; rvm --default use ruby-{{ rvm_ruby }}"
+  args:
+    executable: /bin/bash
+
+- name: "(re)installing bundler"
+  shell: "source /etc/profile.d/rvm.sh; gem install bundler --no-rdoc --no-ri"
+  args:
+    executable: /bin/bash
+
+- name: preparing installation of nodejs
+  shell: "curl --fail -sSL -o setup-nodejs https://deb.nodesource.com/setup_{{ service.nodejs }}.x && bash setup-nodejs"
+  args:
+    warn: no
+
+- name: installing nodejs
+  apt:
+    name: nodejs

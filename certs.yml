@@ -1,0 +1,38 @@
+---
+- hosts: "{{ target }}"
+  gather_facts: no
+  tasks:
+
+    - name: enabling nginx configuration
+      set_fact: nginx=true reload=false
+
+    - name: postfix -> own ssl
+      include_role:
+        name: certs-update-postfix
+
+    - name: middleman -> loop
+      include_role:
+        name: certs-update-middleman
+      loop: "{{ www | list }}"
+      loop_control:
+        loop_var: app
+
+    - name: rails -> loop
+      include_role:
+        name: certs-update-rails
+      loop: "{{ apps | list }}"
+      loop_control:
+        loop_var: app
+
+    - name: html -> loop
+      include_role:
+        name: certs-update-html
+      loop: "{{ html | list }}"
+      loop_control:
+        loop_var: app
+
+    - name: reloading nginx
+      when: reload is defined and reload|bool
+      service:
+        name: nginx
+        state: reloaded

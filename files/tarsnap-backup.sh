@@ -42,7 +42,7 @@ tar cf - "{{ appshome }}/*/shared/public/uploads/" | \
   tar xvf - -C "{{ backup_root }}/backup/" &>> "$LOG" && echo OK
 echo
 echo
-echo -n "dumping all SSL certificates to backup directory"
+echo -n "dumping all SSL certificates to backup directory "
 tar cf - "{{ certroot }}" | \
   tar xvf - -C "{{ backup_root }}/backup/" &>> "$LOG" && echo OK
 echo

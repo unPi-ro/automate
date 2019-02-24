@@ -5,7 +5,7 @@ mkdir -p "{{ backup_root }}/backup/{{ appshome }}"
 # lets secure a bit this backup/dir structure
 chmod 700 "{{ backup_root }}/backup"
 
-DBALL=$(find /var/lib/mysql -maxdepth 1 -type d | xargs -n 1 basename | grep -vE '(sys|mysql|performance_schema)')
+DBALL=$(find /var/lib/mysql -maxdepth 1 -type d | xargs -n 1 basename | grep -vE '^(sys|mysql|performance_schema)$')
 
 DUMP="{{ backup_root }}/backup/mysqldump"
 FULL="{{ backup_root }}/backup/mysqldb/full"

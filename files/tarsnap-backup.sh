@@ -41,6 +41,11 @@ echo -n "dumping all rails apps uploads to backup directory "
 tar cf - "{{ appshome }}/*/shared/public/uploads/" | \
   tar xvf - -C "{{ backup_root }}/backup/" &>> "$LOG" && echo OK
 echo
+echo
+echo -n "dumping all SSL certificates to backup directory"
+tar cf - "{{ certroot }}" | \
+  tar xvf - -C "{{ backup_root }}/backup/" &>> "$LOG" && echo OK
+echo
 echo running tarsnap/backup now
 /usr/bin/tarsnap --print-stats --cachedir "{{ backup_root }}/backup/cache" \
   -c -f "$(uname -n)-$(date +%Y-%m-%d_%H-%M-%S)" \

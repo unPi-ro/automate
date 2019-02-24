@@ -1,7 +1,7 @@
 ---
 all:
   hosts:
-    # backup_fast: FQDNs need to be added here, so that we/ansible can SSH into them
+    # backup_fast: FQDN needs to be added here, so that ansible can SSH into it
     original.mycompany.com:
       ansible_user: root
 

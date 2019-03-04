@@ -29,7 +29,7 @@ for db in $DBALL; do
   mysqldump $db > "$DUMP/full.$db.sql" && echo -n $db,
 done
 echo
-echo *** using xtrabackup now *** restore is not done/documented yet ***
+echo "*** using xtrabackup now *** restore is not done/documented yet ***"
 echo -n "running (full) mysqldb backup live "
 xtrabackup --backup --target-dir="$FULL" &>> "$LOG" && echo OK
 echo

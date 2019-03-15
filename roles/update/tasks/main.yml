@@ -8,11 +8,11 @@
   connection: local
 
 - name: "(re)installing bundler for the local user"
-  shell: gem install bundler --no-rdoc --no-ri
+  shell: gem install bundler
   connection: local
 
 - name: "(re)installing capistrano for the local user"
-  shell: gem install capistrano --no-rdoc --no-ri
+  shell: gem install capistrano
   connection: local
 
 - name: "finding (local) git clones older than 1 day in {{ temphome }}"

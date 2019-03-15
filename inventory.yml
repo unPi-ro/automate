@@ -15,7 +15,7 @@ minus:
       # server variables
       ansible_user: root
       deploy_user: deployer
-      rvm_ruby: 2.5.1
+      rvm_ruby: 2.6.2
 
       # do not activate the cron: jobs by default, nor the cron for backup
       active: no

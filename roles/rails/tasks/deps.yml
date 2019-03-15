@@ -35,7 +35,7 @@
     executable: /bin/bash
 
 - name: "(re)installing bundler"
-  shell: "source /etc/profile.d/rvm.sh; gem install bundler --no-rdoc --no-ri"
+  shell: "source /etc/profile.d/rvm.sh; gem install bundler"
   args:
     executable: /bin/bash
 

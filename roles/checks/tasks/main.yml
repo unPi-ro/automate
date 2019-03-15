@@ -12,6 +12,10 @@
 - name: checking the existence of (local) rvm
   connection: local
   shell: which rvm
+  
+- name: updating (local) rvm
+  connection: local
+  shell: rvm get head
 
 - name: on a Mac with brew? installing node & mysql & imagemagick
   connection: local

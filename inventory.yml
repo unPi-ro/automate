@@ -11,9 +11,10 @@ minus:
 
     # server names must be FQDNs, will be used to bootstrap postfix configuration
     minus.mycompany.com:
-
-      # server variables
       ansible_user: root
+
+    vars:
+      # server variables
       deploy_user: deployer
       rvm_ruby: 2.6.2
 

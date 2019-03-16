@@ -42,6 +42,7 @@
     touch .harden
   args:
     creates: /etc/ssh/.harden
+  register: delkeys
 
 - name: restarting SSHd
   service:
@@ -51,7 +52,9 @@
 - name: "purge the locally cached SSH server key for {{ inventory_hostname }}"
   connection: local
   shell: "ssh-keygen -R {{ inventory_hostname }}"
+  when: delkeys is changed
 
 - name: "purge the locally cached SSH server key for {{ inventory_hostname }} IPv4"
   connection: local
   shell: "ssh-keygen -R $(host {{ inventory_hostname }} | grep 'has address' | cut -d' ' -f4)"
+  when: delkeys is changed

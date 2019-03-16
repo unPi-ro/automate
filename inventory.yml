@@ -13,7 +13,7 @@ minus:
     minus.mycompany.com:
       ansible_user: root
 
-    vars:
+  vars:
       # server variables
       deploy_user: deployer
       rvm_ruby: 2.6.2

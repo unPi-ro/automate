@@ -48,8 +48,6 @@
     name: ssh
     state: restarted
 
-# required by the local ruby/bundler
-
 - name: "purge the locally cached SSH server key for {{ inventory_hostname }}"
   connection: local
   shell: "ssh-keygen -R {{ inventory_hostname }}"

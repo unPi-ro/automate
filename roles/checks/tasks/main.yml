@@ -20,12 +20,3 @@
 - name: on a Mac with brew? installing node & mysql & imagemagick
   connection: local
   shell: which brew && brew install node mysql imagemagick || true
-
-# required by local ruby/bundler
-- name: "purge the locally cached SSH server key for {{ inventory_hostname }}"
-  connection: local
-  shell: "ssh-keygen -R {{ inventory_hostname }}"
-
-- name: "purge the locally cached SSH server key for {{ inventory_hostname }} IPv4"
-  connection: local
-  shell: "ssh-keygen -R $(host {{ inventory_hostname }} | grep 'has address' | cut -d' ' -f4)"

@@ -33,6 +33,7 @@ minus:
       services:
         - { name: checks, os: Debian } # we love Debian, you should install it
         - { name: update }
+        - { name: harden }
         - { name: firewalld }
         - { name: ntp, sync: pool.ntp.org }
         - { name: passenger }

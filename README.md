@@ -35,6 +35,12 @@ ansible-playbook deploy.yml -i inventory.yml -e target=minus -e filter=tacsi
 ansible-playbook rails.yml -i inventory.yml -e target=minus
 ```
 
+### deploying *only* the rails web apps on the target, without restoring backups
+---
+```bash
+ansible-playbook rails.yml -i inventory.yml -e target=minus -e backup=no
+```
+
 ### deploying *only* the middleman sites on the target
 ---
 ```bash

@@ -16,6 +16,10 @@
     executable: /bin/bash
   register: tarex
 
+- name: "installing required python-mysqldb to {{ inventory_hostname }}"
+  apt:
+    name: python-mysqldb
+
 - name: "creating mysql database for {{ app.name }}"
   mysql_db:
     name: "{{ dbname }}"

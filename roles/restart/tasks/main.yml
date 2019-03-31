@@ -5,24 +5,24 @@
     dest: /root/tarsnap.key
     state: link
     force: yes
-  when: backup is defined
+  when: backup is defined and backup|bool
 
 - name: uploading the tarsnap backup script
-  when: backup is defined
+  when: backup is defined and backup|bool
   template:
     src: "files/tarsnap-backup.sh"
     dest: "/root/tarsnap-backup.sh"
     mode: 0700
 
 - name: uploading the tarsnap rotate script
-  when: backup is defined
+  when: backup is defined and backup|bool
   template:
     src: "files/tarsnap-rotate.sh"
     dest: "/root/tarsnap-rotate.sh"
     mode: 0700
 
 - name: creating the nightly backup cronjob
-  when: backup is defined and active is defined and active|bool
+  when: backup is defined and backup|bool and active is defined and active|bool
   template:
     src: files/nightly-backup-runs
     dest: /etc/cron.d/nightly-backup-runs

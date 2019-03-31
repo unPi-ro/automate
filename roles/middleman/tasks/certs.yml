@@ -22,6 +22,7 @@
 - name: "generating the private key for {{ app.name }}"
   openssl_privatekey:
     path: "{{ certroot + '/' + app.name + '/privkey.pem' }}"
+    force: "{{ certforce|bool if certforce is defined else False }}"
 
 - name: "initializing alt names for {{ app.name }}"
   set_fact: alt_names=""

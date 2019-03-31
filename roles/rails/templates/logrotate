@@ -7,6 +7,8 @@
     rotate 10
     create 0644 {{ deploy_user }} {{ deploy_user }}
     postrotate
+    {% if passenger is defined %}
            passenger-config restart-app {{ appshome }}/{{ app.name }}/current
+    {% endif %}
     endscript
 }

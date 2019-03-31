@@ -1,12 +1,10 @@
 ---
 - name: "installing required python-mysqldb to {{ inventory_hostname }}"
-  when: backup is defined
   apt:
     name: python-mysqldb
 
 - name: "installing required python-mysqldb to {{ backup_fast }}"
   delegate_to: "{{ backup_fast }}"
-  when: backup_fast is defined
   apt:
     name: python-mysqldb
 
@@ -14,18 +12,15 @@
 
 - name: "dumping {{ dbname }} database from {{ backup_fast }}"
   delegate_to: "{{ backup_fast }}"
-  when: backup_fast is defined
   mysql_db:
     name: "{{ dbname }}"
     state: dump
     target: "/tmp/dump.{{ dbname }}.{{ timenow }}.sql.bz2"
 
 - name: "rsyncing mysqldump from {{ backup_fast }} over to {{ inventory_host }}"
-  when: backup_fast is defined
   shell: "rsync -av -e 'ssh -o StrictHostKeyChecking=no' {{ backup_fast }}:/tmp/dump.{{ dbname }}.{{ timenow }}.sql.bz2 /tmp/"
 
 - name: "restoring {{ dbname }} database to {{ inventory_hostname }}"
-  when: backup_fast is defined
   mysql_db:
     name: "{{ dbname }}"
     state: import
@@ -33,13 +28,11 @@
 
 - name: "removing mysqldump from {{ backup_fast }}"
   delegate_to: "{{ backup_fast }}"
-  when: backup_fast is defined
   file:
     path: "/tmp/dump.{{ dbname }}.{{ timenow }}.sql.bz2"
     state: absent
 
 - name: "removing mysqldump from {{ inventory_hostname }}"
-  when: backup_fast is defined
   file:
     path: "/tmp/dump.{{ dbname }}.{{ timenow }}.sql.bz2"
     state: absent

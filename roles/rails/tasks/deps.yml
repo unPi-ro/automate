@@ -1,10 +1,16 @@
 ---
 - name: installing required packages
   apt:
-    name: dirmngr,gnupg,apt-transport-https,ca-certificates,curl,build-essential
+    name: dirmngr,gnupg,apt-transport-https,ca-certificates,build-essential
+
+- name: installing (additional) required packages
+  apt:
+    name: curl,imagemagick
 
 - name: adding gpg key for rvm
-  shell: gpg --no-tty --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB
+  shell: |
+    gpg --no-tty --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3
+    gpg --no-tty --recv-keys 7D2BAF1CF37B13E2069D6956105BD0E739499BDB
 
 - name: installing rvm
   shell: "curl -sSL https://get.rvm.io | bash -s stable"

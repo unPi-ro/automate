@@ -58,7 +58,8 @@
 
 - name: "restoring mysqldb from backup/tarsnap for {{ app.name }}"
   include_tasks: mysqldb-tarsnap.yml
-  when: mysql is defined and backup is defined and backup_fast is not defined
+  when: mysql is defined and backup is defined and backup|bool and
+    backup_fast is not defined
 
 - name: "restoring uploads for {{ app.name }}"
   include_tasks: uploads.yml
@@ -66,8 +67,8 @@
 
 - name: "restoring uploads from backup/tarsnap for {{ app.name }}"
   include_tasks: uploads-tarsnap.yml
-  when: backup is defined and backup_fast is not defined
-    and app.uploads is defined and app.uploads|bool and app.sync is defined
+  when: backup is defined and backup|bool and backup_fast is not defined and
+    app.uploads is defined and app.uploads|bool and app.sync is defined
 
 - name: populating server_names
   include_tasks: servernames.yml
@@ -102,6 +103,15 @@
   template:
     src: logrotate
     dest: "/etc/logrotate.d/{{ app.name }}"
+
+- name: listing running passenger applications
+  shell: passenger-status
+  register: psgr_status
+  when: passenger is defined
+
+- name: "restarting {{ app.name }} with new code, if it was running already"
+  shell: "passenger-config restart-app {{ appshome }}/{{ app.name }}/current"
+  when: passenger is defined and app.name in psgr_status.stdout
 
 - name: reloading nginx
   when: nginx is defined

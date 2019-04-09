@@ -68,7 +68,7 @@
   when: service.ssl is not defined and dossl|bool
 
 - name: "creating/updating SSL certs for {{ app.name }}"
-  include_tasks: certs.yml
+  include_tasks: certs.yml certforce=no
   when: service.ssl is not defined and dossl|bool
 
 - name: mask nginx reloading

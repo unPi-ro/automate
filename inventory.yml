@@ -60,7 +60,12 @@ minus:
       certemail: ssl.admin@mycompany.com
       certacckey: certbot-private-key.pem
       certackdir: .well-known/acme-challenge
+      
+      # used to generate dummy www<i> SSL certs for testing purposes
       certdebug: no
+      # (en)force SSL certs regeneration on every run; useful when web apps defs change
+      certforce: no
+      
       certusage:
         - digitalSignature
         - keyEncipherment

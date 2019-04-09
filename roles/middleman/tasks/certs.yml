@@ -61,6 +61,7 @@
     cert: "{{ certroot + '/' + app.name + '/request.crt' }}"
     account_email: "{{ certemail }}"
     remaining_days: "{{ certdays }}"
+    force: "{{ certforce|bool if certforce is defined else False }}"
   register: lets_encrypt_challenge
 
 - name: "creating answers to the {{ app.name }} challenges in the {{ wwwroot }}"
@@ -84,6 +85,7 @@
     challenge: http-01
     remaining_days: "{{ certdays }}"
     data: "{{ lets_encrypt_challenge }}"
+    force: "{{ certforce|bool if certforce is defined else False }}"
   register: lets_encrypt_cert
 
 - name: trigger nginx reloading

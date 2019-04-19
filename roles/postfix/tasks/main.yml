@@ -67,9 +67,21 @@
     app: { name: "{{ inventory_hostname }}" }
   when: service.ssl is not defined and dossl|bool
 
+- name: saving certforce state
+  set_fact: savecertforce=certforce
+  when: certforce is defined and certforce|bool
+
+- name: temporarily setting certforce to no
+  set_fact: certforce=no
+  when: savecertforce is defined and savecertforce|bool
+
 - name: "creating/updating SSL certs for {{ app.name }}"
-  include_tasks: certs.yml certforce=no
+  include_tasks: certs.yml
   when: service.ssl is not defined and dossl|bool
+
+- name: restoring certforce state
+  set_fact: certforce=savecertforce
+  when: savecertforce is defined and savecertforce|bool
 
 - name: mask nginx reloading
   set_fact: reload=false

@@ -15,7 +15,7 @@
 
 - name: updating (local) rvm
   connection: local
-  shell: rvm get head
+  shell: rvm get stable
 
 - name: on a Mac with brew? installing node & mysql & imagemagick
   connection: local

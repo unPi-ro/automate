@@ -4,7 +4,7 @@
   tasks:
 
     - name: enabling nginx configuration
-      set_fact: nginx=true reload=false
+      set_fact: nginx=true reload=false passenger=true
 
     - name: middleman -> loop
       include_role:

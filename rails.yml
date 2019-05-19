@@ -3,7 +3,7 @@
   tasks:
 
     - name: allowing nginx reloading
-      set_fact: nginx=true
+      set_fact: nginx=true passenger=true
 
     # hacking vars / service.nodejs to be used in the already coded deps.yml
     - name: temporarily setting service.nodejs to 10

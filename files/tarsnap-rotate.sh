@@ -21,8 +21,8 @@ set -u
 ###############################################################################
 # Configuration:
 # If you are using multiple keys or other specific options, you can specify them here:
-TARSNAP_R="tarsnap -v --cachedir '{{ backup_root }}/backup/cache' --list-archives" # for getting archive list
-TARSNAP_D="tarsnap -d --cachedir '{{ backup_root }}/backup/cache'" # for deleting, archive names will be appended here
+TARSNAP_R="tarsnap -v --cachedir {{ backup_root }}/backup/cache --list-archives" # for getting archive list
+TARSNAP_D="tarsnap -d --cachedir {{ backup_root }}/backup/cache" # for deleting, archive names will be appended here
 
 # Number of daily, weekly and monthly backups to keep:
 DAILY=30

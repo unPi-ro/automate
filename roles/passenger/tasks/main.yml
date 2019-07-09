@@ -4,7 +4,7 @@
     name: dirmngr,gnupg,apt-transport-https,ca-certificates
 
 - name: adding apt key for passenger
-  shell: apt-key adv --no-tty --keyserver keyserver.ubuntu.com --recv 561F9B9CAC40B2F7
+  shell: apt-key adv --no-tty --recv 561F9B9CAC40B2F7
 
 - name: creating /etc/apt/sources.list.d/passenger.list
   copy:

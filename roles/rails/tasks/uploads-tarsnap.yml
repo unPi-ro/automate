@@ -34,3 +34,6 @@
 
 - name: "rsyncing {{ app.name }} uploads from {{ backup_root }}backup"
   shell: "rsync -av {{ backup_root }}/backup/apps/{{ app.name }}/shared/public/uploads/ {{ appshome }}/{{ app.name }}/shared/public/uploads/"
+
+- name: "rsyncing {{ app.name }} storage from {{ backup_root }}backup"
+  shell: "rsync -av {{ backup_root }}/backup/apps/{{ app.name }}/shared/storage/ {{ appshome }}/{{ app.name }}/shared/storage/"

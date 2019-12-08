@@ -6,6 +6,14 @@
     owner: "{{ deploy_user }}"
     group: "{{ deploy_user }}"
     state: directory
+    
+- name: "preparing rails app (storage) directory on {{ inventory_hostname }}"
+  file:
+    dest: "{{ appshome }}/{{ app.name }}/shared/storage"
+    mode: u=rwx,g=rx,o=rx
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    state: directory
 
 - name: "detecting the last backup/tarsnap archive"
   when: tararch|bool

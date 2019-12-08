@@ -42,6 +42,10 @@ echo -n "dumping all rails apps uploads to backup directory "
 tar cf - "{{ appshome }}"/*/shared/public/uploads/ | \
   tar xvf - -C "{{ backup_root }}/backup/" &>> "$LOG" && echo OK
 echo
+echo -n "dumping all rails apps shared storage to backup directory "
+tar cf - "{{ appshome }}"/*/shared/storage/ | \
+  tar xvf - -C "{{ backup_root }}/backup/" &>> "$LOG" && echo OK
+echo
 echo -n "dumping all SSL certificates to backup directory "
 tar cf - "{{ certroot }}" | \
   tar xvf - -C "{{ backup_root }}/backup/" &>> "$LOG" && echo OK

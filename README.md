@@ -26,19 +26,25 @@ ansible-playbook deploy.yml -i inventory.yml -e target=minus -e active=yes
 ### deploying *only* certain web apps on the target which match the filter
 ---
 ```bash
-ansible-playbook deploy.yml -i inventory.yml -e target=minus -e filter=tacsi
+ansible-playbook deploy.yml -i inventory.yml -e target=minus -e filter=tacsi -e active=yes
+```
+
+### deploying *only* certain web apps on the target and *force* recreating their SSL certificates
+---
+```bash
+ansible-playbook deploy.yml -i inventory.yml -e target=minus -e filter=tacsi -e active=yes -e certforce=yes
 ```
 
 ### deploying *only* the rails web apps on the target
 ---
 ```bash
-ansible-playbook rails.yml -i inventory.yml -e target=minus
+ansible-playbook rails.yml -i inventory.yml -e target=minus -e active=yes
 ```
 
 ### deploying *only* the rails web apps on the target, without restoring backups
 ---
 ```bash
-ansible-playbook rails.yml -i inventory.yml -e target=minus -e backup=no
+ansible-playbook rails.yml -i inventory.yml -e target=minus -e backup=no -e active=yes
 ```
 
 ### deploying *only* the middleman sites on the target

@@ -42,6 +42,15 @@
     upgrade: full
     update_cache: yes
 
+- name: installing basic monitoring: most relevant *top tools
+  apt:
+    name:
+      - htop
+      - atop
+      - iotop
+      - iftop
+      - jnettop
+
 - name: installing git
   apt:
     name: git

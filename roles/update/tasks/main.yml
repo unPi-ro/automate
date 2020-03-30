@@ -47,9 +47,12 @@
     name:
       - htop
       - atop
+      - ctop
       - iotop
       - iftop
+      - dnstop
       - jnettop
+      - powertop
 
 - name: installing git
   apt:

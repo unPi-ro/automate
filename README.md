@@ -5,12 +5,12 @@
 - [x] Passenger (for Ruby on Rails apps, or Flask/Djago apps)
 - [x] Nginx (web server) + Lets Encrypt SSL for all your apps
 - [x] [Percona mySQL](https://www.percona.com/) (database)
-- [x] Postfix (mail server w/ own TLS certificate) + OpenDKIM
+- [x] Postfix (mail server w/ own TLS certificate) + Open[DKIM](https://en.wikipedia.org/wiki/DomainKeys_Identified_Mail)
 - [x] [tarsnap](https://www.tarsnap.com/) (encrypted backups stored remotely)
 - [x] your latest [HTML+CSS](https://aimget.com) apps from your own git repository
 - [x] your latest [Middleman](https://middlemanapp.com/) apps from your own git repository
 - [x] your latest [Ruby on Rails](https://rubyonrails.org/) apps from your own git repo
-- [x] keeps the latest 5 version of all your deployed web apps
+- [x] keeps the latest 5 versions of all your deployed web apps
 - [x] creates nighly (tarsnap) backups of your apps + DB + SSLs
 - [x] script to maintain & prune backups according to schedule
 - [x] deploy time restores from backups of the Rails apps DBs

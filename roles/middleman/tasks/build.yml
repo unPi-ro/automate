@@ -12,7 +12,7 @@
   connection: local
   lineinfile:
     backrefs: yes
-    regexp: '^(\s+)deploy.method\s+=\s+"'
+    regexp: '^(\s+)deploy.deploy_method\s+=\s+"'
     line: '\1deploy.method = :sftp'
     path: "{{ temphome }}/{{ app.name }}/config.rb"
 

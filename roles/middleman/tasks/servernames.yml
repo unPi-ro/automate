@@ -35,3 +35,14 @@
   set_fact:
     server_names: "{{ inventory_hostname }} www1{{ inventory_hostname }} www2{{ inventory_hostname }} www3{{ inventory_hostname }}"
   when: certdebug|bool
+
+- name: "resolving {{ inventory_hostname }} to its IPv4"
+  set_fact: this_server_ipv4="{{ lookup('dig', inventory_hostname) }}"
+
+- name: "ensuring that webserver names resolve to {{ this_server_ipv4 }}"
+  assert:
+    that:
+      - "this_server_ipv4 in lookup('dig', item)"
+    fail_msg: "{{ item }} MUST resolve to {{ this_server_ipv4 }}"
+    success_msg: "{{ item }} does resolve to {{ this_server_ipv4 }}"
+  loop: "{{ server_names.split(' ') }}"

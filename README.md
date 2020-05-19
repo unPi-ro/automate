@@ -1,4 +1,22 @@
-OSX
+## our *automate* framework deploys on Debian/Ubuntu the latest versions of:
+
+- [x] ntp (time sync)
+- [x] ufw (firewall, always active)
+- [x] Passenger (for Ruby on Rails apps, or Flask/Djago apps)
+- [x] Nginx (web server) + Lets Encrypt SSL for all your apps
+- [x] Percona mySQL (database)
+- [x] Postfix (mail server w/ own TLS certificate) + OpenDKIM
+- [x] tarsnap (encrypted backups stored remotely)
+- [x] your latest [HTML+CSS](https://aimget.com) apps from your own git repository
+- [x] your latest [Middleman](https://middlemanapp.com/) apps from your own git repository
+- [x] your latest [Ruby on Rails](https://rubyonrails.org/) apps from your own git repo
+- [x] keeps the latest 5 version of all your deployed web apps
+- [x] creates nighly (tarsnap) backups of your apps + DB + SSLs
+- [x] script to maintain & prune backups according to schedule
+- [x] deploy time restores from backups of the Rails apps DBs
+
+
+### OSX
 ---
 
 1. install brew
@@ -14,7 +32,7 @@ OSX
 ---
 
 
-Running It
+### Running It
 ---
 
 ### deploying all web apps on the target or group of servers called "minus"

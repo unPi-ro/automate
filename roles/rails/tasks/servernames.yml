@@ -40,6 +40,7 @@
   set_fact: this_server_ipv4="{{ lookup('dig', inventory_hostname) }}"
 
 - name: "ensuring that webserver names resolve to {{ this_server_ipv4 }}"
+  when: usessl|bool
   assert:
     that:
       - "this_server_ipv4 in lookup('dig', item)"

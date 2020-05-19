@@ -37,5 +37,10 @@
   shell: ufw allow https
   when: firewall is defined
 
+- name: installing ngxtop to quickly see nginx sites usage
+  pip:
+    name: ngxtop
+    executable: pip
+
 - name: enabling nginx support
   set_fact: nginx=true

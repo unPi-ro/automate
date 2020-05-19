@@ -54,9 +54,13 @@
       - jnettop
       - powertop
 
-- name: installing git
+- name: installing git and few other devops tools
   apt:
-    name: git
+    name: git,bc,wget,whois,curl,socat,httpie,tmux,screen
+
+- name: installing base python pip tools
+  apt:
+    name: python-pip,python3-pip,python-wheel,python3-wheel
 
 - name: setting somaxconn to 4096
   sysctl:

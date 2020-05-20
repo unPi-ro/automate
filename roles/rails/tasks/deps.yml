@@ -9,8 +9,8 @@
 
 - name: adding gpg key for rvm
   shell: |
-    apt-key adv --no-tty --recv 409B6B1796C275462A1703113804BB82D39DC0E3
-    apt-key adv --no-tty --recv 7D2BAF1CF37B13E2069D6956105BD0E739499BDB
+    apt-key adv --keyserver hkps://keys.openpgp.org --no-tty --recv 409B6B1796C275462A1703113804BB82D39DC0E3
+    apt-key adv --keyserver hkps://keys.openpgp.org --no-tty --recv 7D2BAF1CF37B13E2069D6956105BD0E739499BDB
 
 - name: installing rvm
   shell: "curl -sSL https://get.rvm.io | bash -s stable"

@@ -11,12 +11,12 @@
 - [x] your latest [Middleman](https://middlemanapp.com/) apps from your own git repository
 - [x] your latest [Ruby on Rails](https://rubyonrails.org/) apps from your own git repo
 - [x] keeps the latest 5 versions of all your deployed web apps
-- [x] creates nighly (tarsnap) backups of your apps + DB + SSLs
+- [x] creates nightly (tarsnap) backups of your apps + DB + SSLs
 - [x] script to maintain & prune backups according to schedule
 - [x] deploy time restores from backups of the Rails apps DBs
 
 
-### Installing & running automate on OSX
+### Installing & running *automate* on OSX
 ---
 
 1. install brew and rvm

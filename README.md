@@ -1,4 +1,4 @@
-## our *automate* framework deploys on Debian/Ubuntu the latest versions of:
+## our *automate* framework deploys on Debian servers the latest versions of:
 
 - [x] ntp (time sync)
 - [x] ufw (firewall, always active)

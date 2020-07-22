@@ -1,6 +1,5 @@
 ---
 # https://gist.github.com/rjhansen/67ab921ffb4084c865b3618d6955275f#mitigations
-
 - name: securing own .gnupg directory
   file:
     dest: ~/.gnupg
@@ -18,9 +17,7 @@
 - name: shutting down all dirmngr processes
   shell: pkill dirmngr || true
 
-
 # via https://stribika.github.io/2015/01/04/secure-secure-shell.html
-
 - name: hardening the SSH client configuration
   blockinfile:
     path: /etc/ssh/ssh_config

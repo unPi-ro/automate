@@ -27,7 +27,7 @@
 6. see the README in files/, and your SSH (public) keys must go to public-keys/
 7. then, you need to update your DNS records, see https://wiki.debian.org/opendkim
 8. note: when building a production environment, use -e active=yes for cron jobs
-9. while OSX is not actually required, it could make your life more beautiful 🤓
+9. while OSX is not actually required, it could make your experience more rewarding 🤓
 
 ---
 

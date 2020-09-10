@@ -13,7 +13,7 @@
 - [x] keeps the latest 5 versions of all your deployed web apps
 - [x] creates nightly (tarsnap) backups of your apps +DBs +SSLs
 - [x] script to maintain & prune backups according to a schedule
-- [x] deploy time restores from backups of the Rails apps +DBs
+- [x] deploy-time restores from backups of the Rails apps +DBs
 
 
 ### Installing & running *automate* on OSX

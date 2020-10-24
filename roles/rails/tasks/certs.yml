@@ -7,6 +7,13 @@
       - python-openssl
     state: present
 
+# if SSL generation fails, don't nuke nginx
+- name: removing default (enabled) nginx site
+  when: nginx is defined and app is defined
+  file:
+    path: "/etc/nginx/sites-enabled/{{ app.name }}"
+    state: absent
+
 - name: "creating the {{ certroot }} directory for {{ app.name }}"
   file:
     path: "{{ certroot }}/{{ app.name }}"

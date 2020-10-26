@@ -23,10 +23,10 @@
 2. install ansible latest/2.7+ with brew
 3. load your SSH keys into the ssh-agent (with ssh-add)
 4. ready*
-5. note: you need to store your certbot and tarsnap keys to the files/ path
+5. NOTE: you need to store your certbot and tarsnap keys to the files/ path
 6. see the README in files/, and your SSH (public) keys must go to public-keys/
 7. then, you need to update your DNS records, see https://wiki.debian.org/opendkim
-8. note: when building a production environment, use -e active=yes for cron jobs
+8. NOTE: when updating production ENVs, use -e backup=no (do *NOT* restore DBs/files)
 9. while OSX is not actually required, it could make your experience more rewarding 🤓
 
 ---
@@ -53,13 +53,13 @@ ansible-playbook deploy.yml -i inventory.yml -e target=minus -e filter=tacsi -e 
 ansible-playbook deploy.yml -i inventory.yml -e target=minus -e filter=tacsi -e active=yes -e certforce=yes
 ```
 
-### deploying *only* the rails web apps on the target
+### deploying *only* the rails web apps on the target (*WILL* restore DB/file backups)
 ---
 ```bash
 ansible-playbook rails.yml -i inventory.yml -e target=minus -e active=yes
 ```
 
-### deploying *only* the rails web apps on the target, without restoring backups
+### deploying *only* the rails web apps on the target, without restoring *ANY* backups
 ---
 ```bash
 ansible-playbook rails.yml -i inventory.yml -e target=minus -e backup=no -e active=yes

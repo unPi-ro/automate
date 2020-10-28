@@ -1,0 +1,76 @@
+---
+- name: installing munin-node
+  apt:
+    name: munin-plugins-core,munin-plugins-extra,munin-async,libwww-perl
+
+- name: enable all installed munin plugins
+  shell: "munin-node-configure --shell --families=contrib,auto | sh -x"
+  when: muninserver is defined
+
+- name: creating the munin configuration for nginx
+  template:
+    src: nginx-config
+    dest: /etc/munin/plugin-conf.d/nginx
+    mode: a+r
+  when: nginx is defined
+
+- name: activating munin plugins for nginx
+  shell: ln -sf /usr/share/munin/plugins/nginx_* /etc/munin/plugins
+  when: nginx is defined
+
+- name: creating the munin configuration for mysql
+  template:
+    src: mysql-config
+    dest: /etc/munin/plugin-conf.d/mysql
+    mode: a+r
+  when: mysql is defined
+
+- name: activating munin plugins for percona/mysql
+  shell: ln -sf /usr/share/munin/plugins/mysql_[bqst]* /etc/munin/plugins
+  when: mysql is defined
+
+- name: creating the munin configuration for passenger
+  template:
+    src: passenger-config
+    dest: /etc/munin/plugin-conf.d/passenger
+    mode: a+r
+  when: passenger is defined
+
+- name: activating munin plugins for passenger
+  template:
+    src: "{{ item }}"
+    dest: "/etc/munin/plugins/{{ item }}"
+    mode: a+rx
+  loop:
+    - "passenger_memory"
+    - "passenger_processes"
+    - "passenger_status"
+  when: passenger is defined
+
+- name: removing buggy or useless munin plugins
+  shell: rm -f /etc/munin/plugins/{http,mysql_isam}*
+  when: muninserver is defined
+
+- set_fact: muninserver_ipv4="{{ lookup('dig', muninserver) }}"
+  when: muninserver is defined
+
+- name: "allowing munin connections from {{ muninserver }}"
+  lineinfile:
+    backrefs: yes
+    regexp: "^allow(.*)::1(.*)"
+    line: ' allow\1::1\2\nallow {{ muninserver_ipv4 }}\n'
+    path: /etc/munin/munin-node.conf
+  when: muninserver is defined
+
+- name: "allowing munin stats collection from {{ muninserver }}"
+  shell: "ufw allow from {{ muninserver_ipv4 }}/32"
+  when: firewall is defined and muninserver is defined
+
+- name: restarting munin-node
+  service:
+    name: munin-node
+    state: restarted
+
+- name: "building the munin server on {{ muninserver }}"
+  include_tasks: build.yml
+  when: muninserver is defined

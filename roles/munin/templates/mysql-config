@@ -1,0 +1,5 @@
+[mysql_*]
+user root
+env.mysqlconnection DBI:mysql:information_schema
+env.mysqluser root
+env.mysqlopts --defaults-file=/root/.my.cnf

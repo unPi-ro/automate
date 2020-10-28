@@ -1,0 +1,10 @@
+[passenger_memory]
+user root
+env.memory_stats_command /usr/sbin/passenger-memory-stats
+
+[passenger_processes]
+user root
+env.process_stats_command /usr/sbin/passenger-status
+
+[passenger_status]
+user root

@@ -1,0 +1,18 @@
+[solo.aimget.com]
+    address solo.aimget.com
+    use_node_name yes
+
+[fast.aimget.com]
+    address fast.aimget.com
+    use_node_name yes
+
+[moni.aimget.com]
+    address moni.aimget.com
+    use_node_name yes
+
+[atom.aimget.com]
+    address atom.aimget.com
+    use_node_name yes
+
+[aimget.com;]
+     node_order Totals fast.aimget.com solo.aimget.com moni.aimget.com

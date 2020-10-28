@@ -89,7 +89,7 @@ ansible-playbook certs.yml -i inventory.yml -e target=minus
 ansible-playbook deploy.yml -i inventory.yml -e target=minus -e usessl=no -e active=no
 ```
 
-### deploying *only* nginx sites configs on the target w/o installing SSL certs
+### deploying *only* nginx sites configs on the target w/o installing SSL certs, aka HTTP only
 ---
 ```bash
 ansible-playbook domains.yml -i inventory.yml -e target=minus -e usessl=no

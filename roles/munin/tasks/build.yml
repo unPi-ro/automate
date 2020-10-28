@@ -1,0 +1,30 @@
+---
+- name: installing the munin server
+  delegate_to: "{{ muninserver }}"
+  apt:
+    name: munin,munin-doc,ufw,locate,nginx-light,telnet
+
+- name: creating the munin server configuration
+  delegate_to: "{{ muninserver }}"
+  template:
+    src: munin-config
+    dest: /etc/munin/munin-conf.d/aimget.conf
+    mode: a+r
+
+- name: publishing the munin graphs under a public view
+  delegate_to: "{{ muninserver }}"
+  shell: ln -sf /var/cache/munin/www /var/www/html/munin
+
+- name: allowing incoming HTTP/S traffic into the muninserver
+  delegate_to: "{{ muninserver }}"
+  shell: ufw allow http; ufw allow https
+
+- name: enabling ufw on the muninserver
+  delegate_to: "{{ muninserver }}"
+  shell: yes | ufw enable
+
+- name: restarting nginx on the muninserver
+  delegate_to: "{{ muninserver }}"
+  service:
+    name: nginx
+    state: restarted

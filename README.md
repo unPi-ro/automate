@@ -7,6 +7,7 @@
 - [x] [Percona mySQL](https://www.percona.com/) (database)
 - [x] Postfix (mail server w/ own TLS certificate) + Open[DKIM](https://en.wikipedia.org/wiki/DomainKeys_Identified_Mail)
 - [x] [tarsnap](https://www.tarsnap.com/) (encrypted backups stored remotely)
+- [x] [munin](http://munin-monitoring.org/) basic monitoring for nginx mysql passenger cpu ram
 - [x] your latest [HTML+CSS](https://www.lunch-roulette.org/) apps from your own git repository
 - [x] your latest [Middleman](https://middlemanapp.com/) apps from your own git repository
 - [x] your latest [Ruby on Rails](https://rubyonrails.org/) apps from your own git repo

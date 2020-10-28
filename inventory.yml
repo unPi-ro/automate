@@ -4,6 +4,8 @@ all:
     # backup_fast: FQDN needs to be added here, so that ansible can SSH into it
     original.mycompany.com:
       ansible_user: root
+    monitors.mycompany.com:
+      ansible_user: root    
 
 # group name used for deployments, can be used with ansible-playbook -e target=minus
 minus:
@@ -18,11 +20,13 @@ minus:
       deploy_user: deployer
       rvm_ruby: 2.6.2
 
-      # do not activate the cron: jobs by default, nor the cron for backup
-      active: no
+      # activate the cron: jobs by default, and the cron for backups
+      active: yes
 
       # used by cronjobs and logrotate
       notifyemail: notifications@mycompany.com
+      # used by the munin/monitor role
+      muninserver: monitors.mycompany.com
 
       # restore db and files from this server, instead of the tarsnap/backups
       # backup_fast: original.mycompany.com # way faster restores than tarsnap

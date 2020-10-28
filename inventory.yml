@@ -25,7 +25,7 @@ minus:
 
       # used by cronjobs and logrotate
       notifyemail: notifications@mycompany.com
-      # used by the munin/monitor role
+      # used by the munin/monitor/stats role
       muninserver: monitors.mycompany.com
 
       # restore db and files from this server, instead of the tarsnap/backups
@@ -52,6 +52,7 @@ minus:
         - { name: postfix, enforcessl: yes }
         - { name: tarsnap, seed: minus.mycompany.com }
         - { name: rails, nodejs: 10 }
+        - { name: munin }
         - { name: extras }
         - { name: restart, enforce: false } # server reboots only when enforce:d
 

@@ -35,34 +35,34 @@
 ### Running It
 ---
 
-### deploying all web apps on the target or group of servers called "minus"
+### deploying all web apps [+from backups] on the target or group of servers called "minus"
 ---
 ```bash
-ansible-playbook deploy.yml -i inventory.yml -e target=minus -e active=yes
+ansible-playbook deploy.yml -i inventory.yml -e target=minus
 ```
 
-### deploying *only* certain web apps on the target which match the filter
+### deploying *only* certain web apps [+from backups] on the target which match the filter
 ---
 ```bash
-ansible-playbook deploy.yml -i inventory.yml -e target=minus -e filter=tacsi -e active=yes
+ansible-playbook deploy.yml -i inventory.yml -e target=minus -e filter=tacsi
 ```
 
-### deploying *only* certain web apps on the target and *force* recreating their SSL certificates
+### deploying *only* certain web apps [+from backups] on the target and *force* recreating their SSL certs
 ---
 ```bash
-ansible-playbook deploy.yml -i inventory.yml -e target=minus -e filter=tacsi -e active=yes -e certforce=yes
+ansible-playbook deploy.yml -i inventory.yml -e target=minus -e filter=tacsi -e certforce=yes
 ```
 
-### deploying *only* the rails web apps on the target (*WILL* restore DB/file backups)
+### deploying *only* the rails web apps on the target (*WILL* restore their DB/files from backups)
 ---
 ```bash
-ansible-playbook rails.yml -i inventory.yml -e target=minus -e active=yes
+ansible-playbook rails.yml -i inventory.yml -e target=minus
 ```
 
-### deploying *only* the rails web apps on the target, without restoring *ANY* backups
+### deploying *only* the rails web apps on the target, without restoring *ANY*thing from backups
 ---
 ```bash
-ansible-playbook rails.yml -i inventory.yml -e target=minus -e backup=no -e active=yes
+ansible-playbook rails.yml -i inventory.yml -e target=minus -e backup=no
 ```
 
 ### deploying *only* the middleman sites on the target
@@ -83,10 +83,10 @@ ansible-playbook static.yml -i inventory.yml -e target=minus
 ansible-playbook certs.yml -i inventory.yml -e target=minus
 ```
 
-### deploying all web apps on the target w/o installing SSL certs
+### deploying all web apps on the target w/o installing SSL certs, w/o activating their cron:s
 ---
 ```bash
-ansible-playbook deploy.yml -i inventory.yml -e target=minus -e usessl=no
+ansible-playbook deploy.yml -i inventory.yml -e target=minus -e usessl=no -e active=no
 ```
 
 ### deploying *only* nginx sites configs on the target w/o installing SSL certs

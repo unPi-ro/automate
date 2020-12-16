@@ -50,9 +50,9 @@
   args:
     warn: no
 
-- name: installing nodejs
+- name: installing nodejs and libv8
   apt:
-    name: nodejs
+    name: nodejs,libv8-dev
 
 - name: installing pinned wkhtmltox
   apt:

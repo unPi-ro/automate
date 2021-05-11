@@ -54,10 +54,6 @@
   apt:
     name: nodejs,libv8-dev
 
-- name: installing pinned wkhtmltox
-  apt:
-    deb: https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox_0.12.6-1.stretch_amd64.deb
-
 - name: installing yarn repo key, repo and package
   shell: |
     curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -

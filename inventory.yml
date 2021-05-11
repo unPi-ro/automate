@@ -18,7 +18,7 @@ minus:
   vars:
       # server variables
       deploy_user: deployer
-      rvm_ruby: 2.6.2
+      rvm_ruby: 3.0.1
 
       # activate the cron: jobs by default, and the cron for backups
       active: yes

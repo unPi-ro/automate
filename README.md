@@ -48,7 +48,7 @@ ansible-playbook deploy.yml -i inventory.yml -e target=minus
 ansible-playbook deploy.yml -i inventory.yml -e target=minus -e filter=tacsi
 ```
 
-### deploying *only* certain web apps [+from backups] on the target and *force* recreating their SSL certs
+### deploying *only* certain web apps [+from backups] and *force* recreating their SSL certs
 ---
 ```bash
 ansible-playbook deploy.yml -i inventory.yml -e target=minus -e filter=tacsi -e certforce=yes
